@@ -1,3 +1,6 @@
+substitutions:
+  id_prefix: aq_mini
+  node_name: mista-aq-mini
 external_components:
   - source:
       type: git
