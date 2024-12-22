@@ -1,0 +1,1 @@
+# esphome_external_components
