@@ -4,6 +4,7 @@ collection of esphome components
 
 ## SEN66
 Just because i didn't wanted to wait for the official component after getting my SEN66 evaluation kit!
+
 Only works with SEN66.
 
 ### Differences SEN5X to SEN6X
