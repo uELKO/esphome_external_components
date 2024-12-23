@@ -33,6 +33,10 @@ sensor:
       name: "PM <10µm Weight concentration ${node_name}"
       id: ${id_prefix}_pm100
       accuracy_decimals: 1
+    nox:
+      name: "NOX ${node_name}"
+      id: ${id_prefix}_nox
+      accuracy_decimals: 1
     co2:
       name: "CO2 ${node_name}"
       id: ${id_prefix}_co2
