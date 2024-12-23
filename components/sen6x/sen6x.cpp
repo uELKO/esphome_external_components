@@ -111,7 +111,7 @@ void SEN5XComponent::setup() {
         }
         if (product_name_ == "SEN66" || product_name_ == "") { // emppty name!
           ESP_LOGD(TAG, "Productname for real: %s", product_name_.c_str());
-          sen6x_type = SEN54; //for now
+          sen6x_type = SEN55; //for now
         }
         ESP_LOGD(TAG, "Productname %s", product_name_.c_str());
       }
