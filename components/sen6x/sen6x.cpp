@@ -299,14 +299,14 @@ void SEN5XComponent::update() {
     float pm_1_0 = measurements[0] / 10.0;
     if (measurements[0] == 0xFFFF)
       pm_1_0 = NAN;
-    float pm_2_5 = measurements[1] / 10.0;
-    if (measurements[1] == 0xFFFF)
+    float pm_2_5 = (measurements[1] - measurements[0]) / 10.0;
+    if (measurements[1] == 0xFFFF || measurements[0] == 0xFFFF)
       pm_2_5 = NAN;
-    float pm_4_0 = measurements[2] / 10.0;
-    if (measurements[2] == 0xFFFF)
+    float pm_4_0 = (measurements[2] - measurements[1]) / 10.0;
+    if (measurements[2] == 0xFFFF || measurements[1] == 0xFFFF)
       pm_4_0 = NAN;
-    float pm_10_0 = measurements[3] / 10.0;
-    if (measurements[3] == 0xFFFF)
+    float pm_10_0 = (measurements[3] - measurements[2]) / 10.0;
+    if (measurements[3] == 0xFFFF || measurements[2] == 0xFFFF)
       pm_10_0 = NAN;
     float humidity = measurements[4] / 100.0;
     if (measurements[4] == 0xFFFF)
