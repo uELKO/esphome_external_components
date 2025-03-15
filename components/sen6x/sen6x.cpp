@@ -238,10 +238,11 @@ void SEN5XComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "  Serial number %02d.%02d.%02d", serial_number_[0], serial_number_[1], serial_number_[2]);
 
   LOG_UPDATE_INTERVAL(this);
-  LOG_SENSOR("  ", "PM  1.0", this->pm_1_0_sensor_);
-  LOG_SENSOR("  ", "PM  2.5", this->pm_2_5_sensor_);
-  LOG_SENSOR("  ", "PM  4.0", this->pm_4_0_sensor_);
-  LOG_SENSOR("  ", "PM 10.0", this->pm_10_0_sensor_);
+  LOG_SENSOR("  ", "PM  ≤1.0", this->pm_1_0_sensor_);
+  LOG_SENSOR("  ", "PM  1.0-2.5", this->pm_2_5_sensor_);
+  LOG_SENSOR("  ", "PM  2.5-4.0", this->pm_4_0_sensor_);
+  LOG_SENSOR("  ", "PM 4.0-10.0", this->pm_10_0_sensor_);
+  LOG_SENSOR("  ", "PM ≤10.0", this->pm_0_10_sensor_);
   LOG_SENSOR("  ", "Temperature", this->temperature_sensor_);
   LOG_SENSOR("  ", "Humidity", this->humidity_sensor_);
   LOG_SENSOR("  ", "VOC", this->voc_sensor_);  // SEN54 and SEN55 only
