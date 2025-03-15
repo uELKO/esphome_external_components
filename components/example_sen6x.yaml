@@ -6,11 +6,18 @@ external_components:
       type: git
       url: https://github.com/uELKO/esphome_external_components
       ref: patch-1  
+
+i2c: # example, replace
+  sda: GPIO15
+  scl: GPIO16
+  scan: true
+  id: bus_a
+
 sensor:
   - platform: sen6x
     id: sen66
     pm_1_0:
-      name: "PM ≤1 µm SEN66"
+      name: "PM ≤1 µm"
       id: sen66_pm10
       accuracy_decimals: 1
       filters:
@@ -18,7 +25,7 @@ sensor:
             window_size: 9
             send_every: 1
     pm_2_5:
-      name: "PM 1-2.5 µm SEN66"
+      name: "PM 1-2.5 µm"
       id: sen66_pm25
       accuracy_decimals: 1
       filters:
@@ -26,32 +33,32 @@ sensor:
             window_size: 9
             send_every: 1
     pm_4_0:
-      name: "PM 2.5-4 µm SEN66"
+      name: "PM 2.5-4 µm"
       id: sen66_pm40
       accuracy_decimals: 1
     pm_10_0:
-      name: "PM 4-10 µm SEN66"
+      name: "PM 4-10 µm"
       id: sen66_pm100
       accuracy_decimals: 1
     
     nox:
-      name: "NOX SEN66"
+      name: "NOX"
       id: sen66_nox
       accuracy_decimals: 1
     co2:
-      name: "CO2 SEN66"
+      name: "CO₂"
       id: sen66_co2
       accuracy_decimals: 0
     temperature:
-      name: "Temperature SEN66"
+      name: "Temperature"
       accuracy_decimals: 1
       id: sen66_temperature_top
     humidity:
-      name: "Humidity SEN66"
+      name: "Humidity"
       accuracy_decimals: 0
       id: sen66_humidity
     voc:
-      name: "VOC SEN66"
+      name: "VOC"
       id: sen66_voc
       algorithm_tuning:
         index_offset: 100
@@ -72,10 +79,23 @@ sensor:
     update_interval: 10s
 
   - platform: template
-    name: "PM ≤10 µm SEN66"
+    name: "PM ≤10 µm"
     id: sen66_pm010
     unit_of_measurement: "µg/m³"
     accuracy_decimals: 1
     update_interval: 10s
     lambda: |-
       return id(sen66_pm10).state + id(sen66_pm25).state + id(sen66_pm40).state + id(sen66_pm100).state;
+    
+  - platform: template  
+    name: "TVOC (Mølhave)"
+    id: sen66_tvoc
+    unit_of_measurement: "mg/m³"
+    accuracy_decimals: 1
+    update_interval: 10s
+    lambda: |-
+      if (isnan(id(sen66_voc).state)) {
+        return NAN;
+      }
+      float voc_index = id(sen66_voc).state;
+      return ((log(501 - voc_index) - 6.24) * (-996.94)) * 0.001;
