@@ -191,7 +191,7 @@ void SEN5XComponent::setup() {
 
       // Finally start sensor measurements
       auto cmd = SEN5X_CMD_START_MEASUREMENTS_RHT_ONLY;
-      if (this->pm_1_0_sensor_ || this->pm_2_5_sensor_ || this->pm_4_0_sensor_ || this->pm_10_0_sensor_) {
+      if (this->pm_1_0_sensor_ || this->pm_2_5_sensor_ || this->pm_4_0_sensor_ || this->pm_10_0_sensor_ || this->pm_0_10_sensor_) {
         // if any of the gas sensors are active we need a full measurement
         cmd = SEN5X_CMD_START_MEASUREMENTS;
       }
@@ -238,10 +238,11 @@ void SEN5XComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "  Serial number %02d.%02d.%02d", serial_number_[0], serial_number_[1], serial_number_[2]);
 
   LOG_UPDATE_INTERVAL(this);
-  LOG_SENSOR("  ", "PM  1.0", this->pm_1_0_sensor_);
-  LOG_SENSOR("  ", "PM  2.5", this->pm_2_5_sensor_);
-  LOG_SENSOR("  ", "PM  4.0", this->pm_4_0_sensor_);
-  LOG_SENSOR("  ", "PM 10.0", this->pm_10_0_sensor_);
+  LOG_SENSOR("  ", "PM  ≤1.0", this->pm_1_0_sensor_);
+  LOG_SENSOR("  ", "PM  1.0-2.5", this->pm_2_5_sensor_);
+  LOG_SENSOR("  ", "PM  2.5-4.0", this->pm_4_0_sensor_);
+  LOG_SENSOR("  ", "PM 4.0-10.0", this->pm_10_0_sensor_);
+  LOG_SENSOR("  ", "PM ≤10.0", this->pm_0_10_sensor_);
   LOG_SENSOR("  ", "Temperature", this->temperature_sensor_);
   LOG_SENSOR("  ", "Humidity", this->humidity_sensor_);
   LOG_SENSOR("  ", "VOC", this->voc_sensor_);  // SEN54 and SEN55 only
@@ -299,15 +300,18 @@ void SEN5XComponent::update() {
     float pm_1_0 = measurements[0] / 10.0;
     if (measurements[0] == 0xFFFF)
       pm_1_0 = NAN;
-    float pm_2_5 = measurements[1] / 10.0;
-    if (measurements[1] == 0xFFFF)
+    float pm_2_5 = (measurements[1] - measurements[0]) / 10.0;
+    if (measurements[1] == 0xFFFF || measurements[0] == 0xFFFF)
       pm_2_5 = NAN;
-    float pm_4_0 = measurements[2] / 10.0;
-    if (measurements[2] == 0xFFFF)
+    float pm_4_0 = (measurements[2] - measurements[1]) / 10.0;
+    if (measurements[2] == 0xFFFF || measurements[1] == 0xFFFF)
       pm_4_0 = NAN;
-    float pm_10_0 = measurements[3] / 10.0;
-    if (measurements[3] == 0xFFFF)
+    float pm_10_0 = (measurements[3] - measurements[2]) / 10.0;
+    if (measurements[3] == 0xFFFF || measurements[2] == 0xFFFF)
       pm_10_0 = NAN;
+    float pm_0_10 = measurements[3] / 10.0;
+    if (measurements[3] == 0xFFFF)
+      pm_0_10 = NAN;
     float humidity = measurements[4] / 100.0;
     if (measurements[4] == 0xFFFF)
       humidity = NAN;
@@ -333,6 +337,8 @@ void SEN5XComponent::update() {
       this->pm_4_0_sensor_->publish_state(pm_4_0);
     if (this->pm_10_0_sensor_ != nullptr)
       this->pm_10_0_sensor_->publish_state(pm_10_0);
+    if (this->pm_0_10_sensor_ != nullptr)
+      this->pm_0_10_sensor_->publish_state(pm_0_10);
     if (this->temperature_sensor_ != nullptr)
       this->temperature_sensor_->publish_state(temperature);
     if (this->humidity_sensor_ != nullptr)

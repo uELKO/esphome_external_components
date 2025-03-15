@@ -1,57 +1,67 @@
 substitutions:
-  id_prefix: aq_mini
-  node_name: mista-aq-mini
+  id_prefix: <REPLACE>
+  node_name: <REPLACE>
 external_components:
   - source:
       type: git
-      url: https://github.com/tuct/esphome_external_components
-      ref: main  
+      url: https://github.com/uELKO/esphome_external_components
+      ref: main
+
+i2c: # example, replace
+  sda: GPIO15
+  scl: GPIO16
+  scan: true
+  id: bus_a
+
 sensor:
   - platform: sen6x
-    id: sen54
+    id: sen66
     pm_1_0:
-      name: "PM <1µm Weight concentration ${node_name}"
-      id: ${id_prefix}_pm10
+      name: "PM <1 µm"
+      id: sen66_pm10
       accuracy_decimals: 1
-      filters:
-        - sliding_window_moving_average:
-            window_size: 9
-            send_every: 1
     pm_2_5:
-      name: "PM <2.5µm Weight concentration ${node_name}"
-      id: ${id_prefix}_pm25
+      name: "PM 1-2.5 µm"
+      id: sen66_pm25
       accuracy_decimals: 1
-      filters:
-        - sliding_window_moving_average:
-            window_size: 9
-            send_every: 1
     pm_4_0:
-      name: "PM <4µm Weight concentration ${node_name}"
-      id: ${id_prefix}_pm40
+      name: "PM 2.5-4 µm"
+      id: sen66_pm40
       accuracy_decimals: 1
     pm_10_0:
-      name: "PM <10µm Weight concentration ${node_name}"
-      id: ${id_prefix}_pm100
+      name: "PM 4-10 µm"
+      id: sen66_pm100
       accuracy_decimals: 1
-    nox:
-      name: "NOX ${node_name}"
-      id: ${id_prefix}_nox
-      accuracy_decimals: 1
+    
     co2:
-      name: "CO2 ${node_name}"
-      id: ${id_prefix}_co2
-      accuracy_decimals: 1
-    temperature:
-      name: "Temperature top ${node_name}"
-      accuracy_decimals: 1
-      id: ${id_prefix}_temperature_top
-    humidity:
-      name: "Humidity ${node_name}"
+      name: "CO₂"
+      id: sen66_co2
       accuracy_decimals: 0
-      id: ${id_prefix}_humidity
+    temperature:
+      name: "Temperature"
+      accuracy_decimals: 1
+      id: sen66_temperature_top
+    humidity:
+      name: "Humidity"
+      accuracy_decimals: 0
+      id: sen66_humidity
     voc:
-      name: "VOC ${node_name}"
-      id: ${id_prefix}_voc
+      name: "VOC"
+      id: sen66_voc
+      algorithm_tuning:
+        index_offset: 100
+        learning_time_offset_hours: 12
+        learning_time_gain_hours: 12
+        gating_max_duration_minutes: 180
+        std_initial: 50
+        gain_factor: 230
+      filters:
+        - sliding_window_moving_average:
+            window_size: 9
+            send_every: 1
+    nox:
+      name: "NOX"
+      id: sen66_nox
       algorithm_tuning:
         index_offset: 100
         learning_time_offset_hours: 12
@@ -69,3 +79,109 @@ sensor:
       time_constant: 0
     store_baseline: true
     update_interval: 10s
+
+  - platform: template
+    name: "PM ≤10 µm"
+    id: sen66_pm010
+    unit_of_measurement: "µg/m³"
+    accuracy_decimals: 1
+    update_interval: 10s
+    lambda: |-
+      return id(sen66_pm10).state + id(sen66_pm25).state + id(sen66_pm40).state + id(sen66_pm100).state;
+    
+  - platform: template  
+    name: "TVOC (Mølhave)"
+    id: sen66_tvoc
+    unit_of_measurement: "mg/m³"
+    accuracy_decimals: 1
+    update_interval: 10s
+    lambda: |-
+      if (isnan(id(sen66_voc).state)) {
+        return NAN;
+      }
+      float voc_index = id(sen66_voc).state;
+      return ((log(501 - voc_index) - 6.24) * (-996.94)) * 0.001;
+
+  - platform: template
+    name: "IAQ Index"
+    id: iaq_index
+    unit_of_measurement: "IAQ"
+    accuracy_decimals: 0
+    lambda: |-
+      float iaq = 100.0; // Start value for good air quality
+
+      // CO2 contribution (400-1500 ppm is optimal, >2000 ppm is bad)
+      float co2 = id(sen66_co2).state;
+      if (!isnan(co2)) {
+        if (co2 > 1500) {
+          iaq += (co2 - 1500) / 5.0; // Higher CO2 increases IAQ (worse air quality)
+        }
+      }
+
+      // TVOC contribution (0-0.25 mg/m³ is good, >1.0 mg/m³ is bad)
+      float tvoc = id(sen66_tvoc).state;
+      if (!isnan(tvoc)) {
+        if (tvoc > 0.25) {
+          iaq += (tvoc - 0.25) * 100.0; // Higher VOC levels increase IAQ (worse air quality)
+        }
+      }
+
+      // Particulate matter
+      float pm10 = id(sen66_pm10).state;
+      float pm25 = id(sen66_pm25).state;
+      float pm40 = id(sen66_pm40).state;
+      float pm100 = id(sen66_pm100).state;
+      if (!isnan(pm10)) {
+        if (pm10 > 5) {
+          iaq += (pm10 - 5) * 2.0; // Higher PM2.5 increases IAQ
+        }
+      }
+      if (!isnan(pm25)) {
+        if (pm25 > 10) {
+          iaq += (pm25 - 10) * 2.0; // Higher PM2.5 increases IAQ
+        }
+      }
+      if (!isnan(pm40)) {
+        if (pm40 > 10) {
+          iaq += (pm40 - 10) * 2.0; // Higher PM4.0 increases IAQ
+        }
+      }
+      if (!isnan(pm100)) {
+        if (pm100 > 20) {
+          iaq += (pm100 - 20) * 2.0; // Higher PM10 increases IAQ
+        }
+      }
+
+      // Humidity contribution (40-60% is optimal)
+      float humidity = id(sen66_humidity).state;
+      if (!isnan(humidity)) {
+        if (humidity < 30 || humidity > 70) {
+          //iaq += 10; // Extreme humidity adds to IAQ (worse air quality)
+        }
+      }
+
+      // Temperature contribution (20-24°C is optimal)
+      float temp = id(sen66_temperature_top).state;
+      if (!isnan(temp)) {
+        if (temp < 16 || temp > 28) {
+          //iaq += 10; // Extreme temperatures add to IAQ (worse air quality)
+        }
+      }
+
+      // Limit IAQ value to range 100-400
+      if (iaq > 400) iaq = 400;
+      if (iaq < 100) iaq = 100;
+
+      return iaq;
+    filters:
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 1
+
+button:
+  - platform: template
+    name: "Start Fan Autoclean"
+    id: button_start_fan_autoclean
+    on_press: 
+      then:
+        - sen6x.start_fan_autoclean: sen66
