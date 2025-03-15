@@ -188,6 +188,7 @@ SENSOR_MAP = {
     CONF_PM_2_5: "set_pm_2_5_sensor",
     CONF_PM_4_0: "set_pm_4_0_sensor",
     CONF_PM_10_0: "set_pm_10_0_sensor",
+    CONF_PM_0_10: "set_pm_0_10_sensor",
     CONF_VOC: "set_voc_sensor",
     CONF_NOX: "set_nox_sensor",
     CONF_TEMPERATURE: "set_temperature_sensor",
