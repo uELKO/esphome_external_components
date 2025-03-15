@@ -11,6 +11,7 @@ from esphome.const import (
     CONF_PM_2_5,
     CONF_PM_4_0,
     CONF_PM_10_0,
+    CONF_PM_0_10,
     CONF_CO2,
     CONF_STORE_BASELINE,
     CONF_TEMPERATURE,
@@ -119,6 +120,13 @@ CONFIG_SCHEMA = (
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_PM_10_0): sensor.sensor_schema(
+                unit_of_measurement=UNIT_MICROGRAMS_PER_CUBIC_METER,
+                icon=ICON_CHEMICAL_WEAPON,
+                accuracy_decimals=2,
+                device_class=DEVICE_CLASS_PM10,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_PM_0_10): sensor.sensor_schema(
                 unit_of_measurement=UNIT_MICROGRAMS_PER_CUBIC_METER,
                 icon=ICON_CHEMICAL_WEAPON,
                 accuracy_decimals=2,
