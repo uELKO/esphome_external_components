@@ -308,6 +308,9 @@ void SEN5XComponent::update() {
     float pm_10_0 = (measurements[3] - measurements[2]) / 10.0;
     if (measurements[3] == 0xFFFF || measurements[2] == 0xFFFF)
       pm_10_0 = NAN;
+    float pm_0_10 = (measurements[3]) / 10.0;
+    if (measurements[3] == 0xFFFF)
+      pm_0_10 = NAN;
     float humidity = measurements[4] / 100.0;
     if (measurements[4] == 0xFFFF)
       humidity = NAN;
@@ -333,6 +336,8 @@ void SEN5XComponent::update() {
       this->pm_4_0_sensor_->publish_state(pm_4_0);
     if (this->pm_10_0_sensor_ != nullptr)
       this->pm_10_0_sensor_->publish_state(pm_10_0);
+    if (this->pm_0_10_sensor_ != nullptr)
+      this->pm_0_10_sensor_->publish_state(pm_0_10);
     if (this->temperature_sensor_ != nullptr)
       this->temperature_sensor_->publish_state(temperature);
     if (this->humidity_sensor_ != nullptr)
