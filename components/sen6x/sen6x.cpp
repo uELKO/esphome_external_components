@@ -321,7 +321,7 @@ void SEN5XComponent::update() {
     float voc = measurements[6] / 10.0;
     if (measurements[6] == 0x7FFF)
       voc = NAN;
-    float nox = measurements[7] / 10.0;
+    float nox = measurements[7] * 10.0;
     if (measurements[7] == 0x7FFF)
       nox = NAN;
     float co2 = measurements[8];
