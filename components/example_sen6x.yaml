@@ -93,7 +93,7 @@ sensor:
     name: "TVOC (Mølhave)"
     id: sen66_tvoc
     unit_of_measurement: "mg/m³"
-    accuracy_decimals: 1
+    accuracy_decimals: 2
     update_interval: 10s
     lambda: |-
       if (isnan(id(sen66_voc).state)) {
