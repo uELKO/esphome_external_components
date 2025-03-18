@@ -98,38 +98,38 @@ void SEN5XComponent::setup() {
         current_int++;
       } while (current_char && --max);
 
-      Sen5xType sen6x_type = UNKNOWN;
+      Sen5xType sen5x_type = UNKNOWN;
       if (product_name_ == "SEN50") {
-        sen6x_type = SEN50;
+        sen5x_type = SEN50;
       } else {
         if (product_name_ == "SEN54") {
-          sen6x_type = SEN54;
+          sen5x_type = SEN54;
         } else {
           if (product_name_ == "SEN55") {
-            sen6x_type = SEN55;
+            sen5x_type = SEN55;
           }
         }
         if (product_name_ == "SEN66" || product_name_ == "") { // emppty name!
           ESP_LOGD(TAG, "Productname for real: %s", product_name_.c_str());
-          sen6x_type = SEN55; //for now
+          sen5x_type = SEN55; //for now
         }
         ESP_LOGD(TAG, "Productname %s", product_name_.c_str());
       }
-      if (this->humidity_sensor_ && sen6x_type == SEN50) {
+      if (this->humidity_sensor_ && sen5x_type == SEN50) {
         ESP_LOGE(TAG, "For Relative humidity a SEN54 OR SEN55 is required. You are using a <%s> sensor",
                  this->product_name_.c_str());
         this->humidity_sensor_ = nullptr;  // mark as not used
       }
-      if (this->temperature_sensor_ && sen6x_type == SEN50) {
+      if (this->temperature_sensor_ && sen5x_type == SEN50) {
         ESP_LOGE(TAG, "For Temperature a SEN54 OR SEN55 is required. You are using a <%s> sensor",
                  this->product_name_.c_str());
         this->temperature_sensor_ = nullptr;  // mark as not used
       }
-      if (this->voc_sensor_ && sen6x_type == SEN50) {
+      if (this->voc_sensor_ && sen5x_type == SEN50) {
         ESP_LOGE(TAG, "For VOC a SEN54 OR SEN55 is required. You are using a <%s> sensor", this->product_name_.c_str());
         this->voc_sensor_ = nullptr;  // mark as not used
       }
-      if (this->nox_sensor_ && sen6x_type != SEN55) {
+      if (this->nox_sensor_ && sen5x_type != SEN55) {
         ESP_LOGE(TAG, "For NOx a SEN55 is required. You are using a <%s> sensor", this->product_name_.c_str());
         this->nox_sensor_ = nullptr;  // mark as not used
       }
